@@ -29,3 +29,45 @@ jobs:
         tags: czechclouds:test
         cache-from: type=gha
         cache-to: type=gha,mode=max
+        
+    - name: 🟢 Sending succes build info
+      if: success()
+      run: |
+        WEBHOOK_URL="https://n8n.lahevodvika.eu/webhook-test/007a3735-e7e2-43d2-a9d2-2bd5511c9f82"
+        
+        PAYLOAD='{
+          "status": "success",
+          "build_result": "Docker image build succesfully.",
+          "repository": "${{ github.repository }}",
+          "pusher": "${{ github.triggering_actor }}",
+          "event": "${{ github.event_name }}",
+          "branch": "${{ github.ref_name }}",
+          "sha": "${{ github.sha }}"
+        }'
+        
+        echo "Sending succes build info..."
+        curl -X POST \
+          -H "Content-Type: application/json" \
+          -d "$PAYLOAD" \
+          $WEBHOOK_URL
+    
+    - name: 🔴 Sending failed build info
+      if: failure()
+      run: |
+        WEBHOOK_URL="https://n8n.lahevodvika.eu/webhook-test/007a3735-e7e2-43d2-a9d2-2bd5511c9f82"
+        
+        PAYLOAD='{
+          "status": "failure",
+          "build_result": "Docker image build failed!",
+          "repository": "${{ github.repository }}",
+          "pusher": "${{ github.triggering_actor }}",
+          "event": "${{ github.event_name }}",
+          "branch": "${{ github.ref_name }}",
+          "sha": "${{ github.sha }}"
+        }'
+
+        echo "Sending failed build info..."
+        curl -X POST \
+          -H "Content-Type: application/json" \
+          -d "$PAYLOAD" \
+          $WEBHOOK_URL
