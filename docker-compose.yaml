@@ -5,22 +5,25 @@ services:
     container_name: website
     image: website:latest
     networks:
-      - website_network
+      - web
     restart: always
-    ports:
-      - "3000:3000"
-    env_file:
-      - .env.local
+    env_file: ".env"
   db:
-    env_file: ".env.local"
+    env_file: ".env"
     container_name: website_db
     image: postgres:15
     networks:
-      - website_network
+      - web
     environment:
       POSTGRES_DB: app
       POSTGRES_USER: ${DB_USER}
       POSTGRES_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - website_db:/var/lib/postgresql/data
 
 networks:
-  website_network:
+  web:
+    external: true
+
+volumes:
+  website_db:
